@@ -3,6 +3,8 @@ import { getAuthUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { deductToken, getTokenInfo } from "@/lib/tokens";
 import { uploadToImageKit } from "@/lib/imagekit";
+
+export const dynamic = "force-dynamic";
 import { saveScan } from "@/lib/scan-storage";
 import { geminiChat } from "@/lib/gemini";
 import { GEMINI_MODEL_SCORING } from "@/lib/constants";
