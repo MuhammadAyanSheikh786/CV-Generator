@@ -1,0 +1,13 @@
+[
+  {
+    "id": "8cd12d48-32da-4a34-960c-b118f656dbbe",
+    "email": "muhammadayanwaqar786@gmail.com",
+    "password": "$2b$12$7ukzHb5eNvcXZftku.xYwuNFKbV3wlxVkdwN10oPDl8V7aBGi0CXu",
+    "name": "Muhammad Ayan",
+    "createdAt": "2026-06-04T10:39:56.283Z",
+    "tokens": {
+      "balance": 31,
+      "expiresAt": "2026-06-11T10:39:56.283Z"
+    }
+  }
+]
