@@ -1,9 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { Header } from "@/components/layout/header";
 import { ToastContainer } from "@/components/ui/toast";
 import { useCVStore } from "@/store/cv-store";
@@ -13,12 +12,10 @@ import { getFirebaseAuthModule, getGoogleProvider } from "@/lib/firebase-client"
 import {
   createUserWithEmailAndPassword,
   signInWithPopup,
-  onAuthStateChanged,
   updateProfile,
 } from "firebase/auth";
 
 export default function SignupPage() {
-  const router = useRouter();
   const auth = typeof window !== "undefined" ? getFirebaseAuthModule() : null as any;
   const googleProvider = typeof window !== "undefined" ? getGoogleProvider() : null as any;
   const addToast = useCVStore((s) => s.addToast);
@@ -27,18 +24,6 @@ export default function SignupPage() {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-
-  useEffect(() => {
-    const unsub = onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        const token = await user.getIdToken();
-        document.cookie = `token=${token}; path=/; max-age=3600; SameSite=Lax`;
-      } else {
-        document.cookie = "token=; path=/; max-age=0";
-      }
-    });
-    return () => unsub();
-  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,9 +41,9 @@ export default function SignupPage() {
       const cred = await createUserWithEmailAndPassword(auth, email, password);
       await updateProfile(cred.user, { displayName: name.trim() });
       const token = await cred.user.getIdToken();
-      document.cookie = `token=${token}; path=/; max-age=3600; SameSite=Lax`;
+      document.cookie = `token=${token}; path=/; max-age=604800; SameSite=Lax`;
       addToast("success", "Account created! You received 50 free tokens.");
-      router.push("/dashboard");
+      window.location.href = "/builder";
     } catch (err: any) {
       const msg = err.message || "";
       if (msg.includes("email-already-in-use")) {
@@ -76,9 +61,9 @@ export default function SignupPage() {
     try {
       const result = await signInWithPopup(auth, googleProvider);
       const token = await result.user.getIdToken();
-      document.cookie = `token=${token}; path=/; max-age=3600; SameSite=Lax`;
+      document.cookie = `token=${token}; path=/; max-age=604800; SameSite=Lax`;
       addToast("success", "Account created! You received 50 free tokens.");
-      router.push("/dashboard");
+      window.location.href = "/builder";
     } catch (err: any) {
       const msg = err.message || "";
       if (msg.includes("auth/popup-closed-by-user")) return;

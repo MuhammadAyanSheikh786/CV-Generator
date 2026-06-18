@@ -1,0 +1,98 @@
+[
+  {
+    "name": "abc",
+    "description": "Elegant gold and white theme for a sophisticated CV",
+    "prompt": "generate gold whitev theme template",
+    "category": "Modern",
+    "style": "creative",
+    "layout": "single-column",
+    "colors": {
+      "primary": "#F8E231",
+      "secondary": "#FFFFFF",
+      "accent": "#FFD700",
+      "background": "#FFFFFF",
+      "text": "#333333"
+    },
+    "fonts": {
+      "heading": "Montserrat",
+      "body": "Lato"
+    },
+    "generatedBy": "abc",
+    "generatedByEmail": "muhammadayanwaqar786@gmail.com",
+    "id": "1973044b-b70c-48a6-b3fd-9bda7b3ce92d",
+    "downloads": 0,
+    "createdAt": "2026-06-17T11:06:23.897Z"
+  },
+  {
+    "name": "golden",
+    "description": "Elegant golden and black CV template",
+    "prompt": "i want golden and black theme",
+    "category": "Executive",
+    "style": "executive",
+    "layout": "single-column",
+    "colors": {
+      "primary": "#FFD700",
+      "secondary": "#333333",
+      "accent": "#FF8C00",
+      "background": "#000000",
+      "text": "#FFFFFF"
+    },
+    "fonts": {
+      "heading": "Montserrat",
+      "body": "Lato"
+    },
+    "generatedBy": "golden",
+    "generatedByEmail": "muhammadayanwaqar786@gmail.com",
+    "id": "58b6dd8d-7389-449a-8d75-bfe15d5418a8",
+    "downloads": 0,
+    "createdAt": "2026-06-18T10:11:50.236Z"
+  },
+  {
+    "name": "abc",
+    "description": "A sophisticated black and gold theme with a personal touch",
+    "prompt": "i want golden black theme with image avator on bottom",
+    "category": "Professional",
+    "style": "executive",
+    "layout": "single-column",
+    "colors": {
+      "primary": "#FFD700",
+      "secondary": "#333333",
+      "accent": "#FF8C00",
+      "background": "#000000",
+      "text": "#FFFFFF"
+    },
+    "fonts": {
+      "heading": "Montserrat",
+      "body": "Lato"
+    },
+    "generatedBy": "abc",
+    "generatedByEmail": "muhammadayanwaqar786@gmail.com",
+    "id": "d3498d36-6571-4112-b9c5-3a3b6b14fbc8",
+    "downloads": 0,
+    "createdAt": "2026-06-18T10:13:16.370Z"
+  },
+  {
+    "name": "f",
+    "description": "A modern theme with a floating name at the bottom",
+    "prompt": "i want new theme in which name should be floating in bottom",
+    "category": "Modern",
+    "style": "minimalist",
+    "layout": "single-column",
+    "colors": {
+      "primary": "#3498db",
+      "secondary": "#f1c40f",
+      "accent": "#2ecc71",
+      "background": "#ffffff",
+      "text": "#333333"
+    },
+    "fonts": {
+      "heading": "Montserrat",
+      "body": "Lato"
+    },
+    "generatedBy": "f",
+    "generatedByEmail": "muhammadayanwaqar786@gmail.com",
+    "id": "c6be5745-4f54-4ff7-be05-fefd4b873dd4",
+    "downloads": 0,
+    "createdAt": "2026-06-18T10:14:07.895Z"
+  }
+]

@@ -136,7 +136,7 @@ export const useCVStore = create<CVStore>((set, get) => ({
 
   data: { ...EMPTY_CV },
   currentStep: 1,
-  selectedTemplate: "minimalist",
+  selectedTemplate: "clean-blue",
   isDarkMode: true,
   hasData: false,
   toasts: [],

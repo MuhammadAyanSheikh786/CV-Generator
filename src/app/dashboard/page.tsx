@@ -11,7 +11,7 @@ import { ImpressionBox } from "@/components/ai/impression-box";
 import { PDFAnalysisResult, AuthUser } from "@/lib/schemas";
 import { cn } from "@/lib/utils";
 import { getFirebaseAuthModule } from "@/lib/firebase-client";
-import { signOut, onAuthStateChanged } from "firebase/auth";
+import { signOut } from "firebase/auth";
 
 interface ScanItem {
   id: string;
@@ -137,15 +137,6 @@ export default function DashboardPage() {
   useEffect(() => {
     checkAuth();
     loadScans();
-    const unsub = onAuthStateChanged(auth, async (fbUser) => {
-      if (fbUser) {
-        const token = await fbUser.getIdToken();
-        document.cookie = `token=${token}; path=/; max-age=3600; SameSite=Lax`;
-      } else {
-        document.cookie = "token=; path=/; max-age=0";
-      }
-    });
-    return () => unsub();
   }, []);
 
   const checkAuth = async () => {
@@ -289,7 +280,7 @@ export default function DashboardPage() {
           className="card-3d p-6 sm:p-8"
         >
           <h2 className="text-sm font-semibold uppercase tracking-wider text-dark-100 mb-4">
-            Upload Your CV
+            AI Resume Checker
           </h2>
           <DropZone onFile={handleFile} disabled={isUploading} />
 

@@ -86,7 +86,17 @@ export interface RateLimitState {
   resetTimestamp: number;
 }
 
-export type CVTemplateId = "minimalist" | "executive" | "techmodern" | "creative";
+export type CVTemplateId =
+  | "clean-blue" | "clean-slate" | "clean-teal"
+  | "modern-coral" | "modern-emerald" | "modern-violet"
+  | "bold-crimson" | "bold-amber" | "bold-indigo"
+  | "dark-emerald" | "dark-cyan" | "dark-rose"
+  | "minimal-charcoal" | "minimal-sand" | "minimal-ivory"
+  | "warm-terracotta" | "warm-ochre" | "warm-rust"
+  | "luxury-gold" | "luxury-plum" | "luxury-navy"
+  | "tech-cobalt" | "tech-mint" | "tech-steel"
+  | "vivid-sunset" | "vivid-ocean" | "vivid-forest"
+  | "pastel-lavender" | "pastel-peach" | "pastel-sky";
 
 export type StepId = 1 | 2 | 3 | 4 | 5;
 
@@ -127,33 +137,35 @@ export interface PDFAnalysisResult extends AICheckResult {
   tipsToFix: string[];
 }
 
-export interface TemplateColors {
-  primary: string;
-  secondary: string;
-  accent: string;
-  background: string;
-  text: string;
-}
+export type HeaderStyle = "standard" | "dark" | "gradient" | "sidebar" | "centered" | "accent-bar" | "minimal";
+export type SectionStyle = "standard" | "card" | "timeline" | "bordered" | "ghost";
+export type SkillStyle = "pill" | "bar" | "grid" | "tag";
+export type LayoutStyle = "single-column" | "two-column";
 
-export interface TemplateFonts {
-  heading: string;
-  body: string;
-}
-
-export interface CommunityTemplate {
-  id: string;
+export interface TemplateVariant {
+  id: CVTemplateId;
   name: string;
   description: string;
-  prompt: string;
-  category: string;
-  style: CVTemplateId;
-  layout: "single-column" | "two-column";
-  colors: TemplateColors;
-  fonts: TemplateFonts;
-  generatedBy: string;
-  generatedByEmail: string;
-  downloads: number;
-  createdAt: string;
+  layout: LayoutStyle;
+  colors: {
+    primary: string;
+    secondary: string;
+    accent: string;
+    background: string;
+    text: string;
+    heading: string;
+    muted: string;
+    surface: string;
+    border: string;
+  };
+  fonts: {
+    heading: string;
+    body: string;
+  };
+  headerStyle: HeaderStyle;
+  sectionStyle: SectionStyle;
+  skillStyle: SkillStyle;
+  spacing: "compact" | "normal" | "spacious";
 }
 
 export interface AuthUser {

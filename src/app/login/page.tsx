@@ -1,36 +1,22 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { getFirebaseAuthModule, getGoogleProvider } from "@/lib/firebase-client";
-import { signInWithEmailAndPassword, signInWithPopup, onAuthStateChanged } from "firebase/auth";
+import { signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
 import { Header } from "@/components/layout/header";
 import { ToastContainer } from "@/components/ui/toast";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
 export default function LoginPage() {
-  const router = useRouter();
   const auth = typeof window !== "undefined" ? getFirebaseAuthModule() : null as any;
   const googleProvider = typeof window !== "undefined" ? getGoogleProvider() : null as any;
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-
-  useEffect(() => {
-    const unsub = onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        const token = await user.getIdToken();
-        document.cookie = `token=${token}; path=/; max-age=3600; SameSite=Lax`;
-      } else {
-        document.cookie = "token=; path=/; max-age=0";
-      }
-    });
-    return () => unsub();
-  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,11 +25,12 @@ export default function LoginPage() {
     try {
       const cred = await signInWithEmailAndPassword(auth, email, password);
       const token = await cred.user.getIdToken();
-      document.cookie = `token=${token}; path=/; max-age=3600; SameSite=Lax`;
-      router.push("/dashboard");
+      document.cookie = `token=${token}; path=/; max-age=604800; SameSite=Lax`;
+      window.location.href = "/builder";
     } catch (err: any) {
+      const code = err.code || "";
       setError(
-        err.message?.includes("user-not-found") || err.message?.includes("wrong-password")
+        code === "auth/invalid-credential" || code === "auth/user-not-found" || code === "auth/wrong-password"
           ? "Invalid email or password"
           : err.message || "Login failed"
       );
@@ -56,8 +43,8 @@ export default function LoginPage() {
     try {
       const result = await signInWithPopup(auth, googleProvider);
       const token = await result.user.getIdToken();
-      document.cookie = `token=${token}; path=/; max-age=3600; SameSite=Lax`;
-      router.push("/dashboard");
+      document.cookie = `token=${token}; path=/; max-age=604800; SameSite=Lax`;
+      window.location.href = "/builder";
     } catch (err: any) {
       if (err.code !== "auth/popup-closed-by-user") {
         setError(err.message || "Google login failed");

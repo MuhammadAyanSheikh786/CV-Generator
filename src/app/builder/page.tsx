@@ -11,10 +11,7 @@ import { Step3Experience } from "@/components/forms/step-3-experience";
 import { Step4Skills } from "@/components/forms/step-4-skills";
 import { Step5Advanced } from "@/components/forms/step-5-advanced";
 import { TemplateSelector } from "@/components/templates/template-selector";
-import { Template1Minimalist } from "@/components/templates/template-1-minimalist";
-import { Template2Executive } from "@/components/templates/template-2-executive";
-import { Template3TechModern } from "@/components/templates/template-3-techmodern";
-import { Template4Creative } from "@/components/templates/template-4-creative";
+import { ModernTemplate } from "@/components/templates/ModernTemplate";
 import dynamic from "next/dynamic";
 
 const PdfExport = dynamic(
@@ -30,6 +27,7 @@ import { Button } from "@/components/ui/button";
 import { canGenerateCV, getRemainingGenerations } from "@/lib/rate-limit";
 import { isStepValid } from "@/lib/validation";
 import { STEPS } from "@/lib/schemas";
+import { TEMPLATE_VARIANTS } from "@/lib/template-configs";
 import { cn } from "@/lib/utils";
 
 const stepComponents = {
@@ -54,13 +52,7 @@ export default function Builder() {
   const CurrentStepComponent = stepComponents[currentStep];
   const currentStepConfig = STEPS.find((s) => s.id === currentStep);
 
-  const templateComponents = {
-    minimalist: Template1Minimalist,
-    executive: Template2Executive,
-    techmodern: Template3TechModern,
-    creative: Template4Creative,
-  };
-  const SelectedTemplate = templateComponents[selectedTemplate];
+  const variant = TEMPLATE_VARIANTS.find((v) => v.id === selectedTemplate) ?? TEMPLATE_VARIANTS[0];
 
   const handleNext = () => {
     if (isStepValid(currentStep, data)) {
@@ -199,11 +191,11 @@ export default function Builder() {
                   <div className="w-3 h-3 rounded-full bg-yellow-500" />
                   <div className="w-3 h-3 rounded-full bg-green-500" />
                   <span className="text-[10px] text-gray-400 ml-2 font-mono">
-                    CV Preview — {selectedTemplate}
+                    CV Preview — {variant.name}
                   </span>
                 </div>
                 <div className="mt-8" ref={cvRef}>
-                  <SelectedTemplate data={data} />
+                  <ModernTemplate data={data} variant={variant} />
                 </div>
               </div>
 

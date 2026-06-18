@@ -2,9 +2,14 @@
 
 import { motion, useScroll, useTransform } from "framer-motion";
 import Link from "next/link";
-import { useRef } from "react";
+import { useRef, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { useCVStore } from "@/store/cv-store";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
+import { getFirebaseAuthModule } from "@/lib/firebase-client";
+import { signOut } from "firebase/auth";
+import { getInitials } from "@/lib/utils";
+import { getRemainingGenerations } from "@/lib/rate-limit";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 40 },
@@ -149,8 +154,20 @@ const steps = [
 ];
 
 export default function Home() {
+  const router = useRouter();
   const { isDarkMode } = useCVStore();
+  const user = useCVStore((s) => s.user);
+  const tokenBalance = useCVStore((s) => s.tokenBalance);
+  const auth = typeof window !== "undefined" ? getFirebaseAuthModule() : null;
+  const remainingGens = getRemainingGenerations();
   const heroRef = useRef<HTMLDivElement>(null);
+
+  const handleLogout = useCallback(async () => {
+    if (auth) await signOut(auth);
+    document.cookie = "token=; path=/; max-age=0";
+    router.push("/");
+    router.refresh();
+  }, [auth, router]);
   const { scrollYProgress } = useScroll({
     target: heroRef,
     offset: ["start start", "end start"],
@@ -195,31 +212,68 @@ export default function Home() {
             </div>
 
             <div className="flex items-center gap-1.5 sm:gap-3">
-              <Link
-                href="/resume-checker"
-                className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-xs sm:text-sm font-medium text-dark-500 dark:text-dark-400 hover:text-lightning-500 dark:hover:text-lightning-500 transition-colors"
-              >
-                <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                </svg>
-                AI Checker
-              </Link>
-              <Link
-                href="/login"
-                className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-xs sm:text-sm font-medium text-dark-500 dark:text-dark-400 hover:text-lightning-500 dark:hover:text-lightning-500 transition-colors"
-              >
-                Sign In
-              </Link>
-              <Link
-                href="/signup"
-                className="btn-lightning text-xs sm:text-sm px-3 py-1.5 sm:px-5 sm:py-2.5"
-              >
-                <span className="hidden sm:inline">Sign Up Free</span>
-                <span className="sm:hidden">Free</span>
-                <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                </svg>
-              </Link>
+              {user ? (
+                <>
+                  <Link
+                    href="/dashboard"
+                    className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-xs sm:text-sm font-medium text-lightning-500 hover:bg-lightning-500/10 transition-all"
+                  >
+                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                    </svg>
+                    AI Resume Checker
+                  </Link>
+                  <div className="hidden sm:flex items-center gap-2 pl-3 border-l border-dark-200 dark:border-dark-700">
+                    <div className="w-7 h-7 rounded-lg bg-lightning-500/10 border border-lightning-500/20 flex items-center justify-center text-[10px] font-bold text-lightning-500">
+                      {getInitials(user.name)}
+                    </div>
+                    <div className="text-left">
+                      <p className="text-[11px] font-semibold text-dark-800 dark:text-dark-200 leading-tight">{user.name}</p>
+                      <div className="flex items-center gap-2 text-[9px] text-dark-400 dark:text-dark-500">
+                        <span>{tokenBalance} tokens</span>
+                        <span>{remainingGens} gens</span>
+                      </div>
+                    </div>
+                    <button
+                      onClick={handleLogout}
+                      className="ml-1 p-1.5 rounded-lg text-dark-400 dark:text-dark-500 hover:text-red-500 hover:bg-red-500/10 transition-all"
+                      title="Logout"
+                    >
+                      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                      </svg>
+                    </button>
+                  </div>
+                  {/* Mobile: show initials + dashboard */}
+                  <Link
+                    href="/dashboard"
+                    className="sm:hidden flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-xs font-medium text-lightning-500"
+                  >
+                    <div className="w-6 h-6 rounded-md bg-lightning-500/10 border border-lightning-500/20 flex items-center justify-center text-[8px] font-bold">
+                      {getInitials(user.name)}
+                    </div>
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <Link
+                    href="/login"
+                    className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-xs sm:text-sm font-medium text-dark-500 dark:text-dark-400 hover:text-lightning-500 dark:hover:text-lightning-500 transition-colors"
+                  >
+                    Sign In
+                  </Link>
+                  <Link
+                    href="/signup"
+                    className="btn-lightning text-xs sm:text-sm px-3 py-1.5 sm:px-5 sm:py-2.5"
+                  >
+                    <span className="hidden sm:inline">Sign Up Free</span>
+                    <span className="sm:hidden">Free</span>
+                    <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                  </Link>
+                </>
+              )}
               <ThemeToggle />
               <Link
                 href="/builder"
