@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { Header } from "@/components/layout/header";
@@ -8,10 +8,11 @@ import { ToastContainer } from "@/components/ui/toast";
 import { Button } from "@/components/ui/button";
 import { ScoreGauge } from "@/components/ai/score-gauge";
 import { ImpressionBox } from "@/components/ai/impression-box";
-import { PDFAnalysisResult, AuthUser } from "@/lib/schemas";
+import { PDFAnalysisResult } from "@/lib/schemas";
 import { cn } from "@/lib/utils";
 import { getFirebaseAuthModule } from "@/lib/firebase-client";
 import { signOut } from "firebase/auth";
+import { useCVStore } from "@/store/cv-store";
 
 interface ScanItem {
   id: string;
@@ -116,46 +117,26 @@ function BreakdownBar({ label, value }: { label: string; value: number }) {
 
 export default function DashboardPage() {
   const router = useRouter();
-  const [user, setUser] = useState<AuthUser | null>(null);
-  const [isAuthLoading, setIsAuthLoading] = useState(true);
+  const storeUser = useCVStore((s) => s.user);
+  const storeIsAuthLoading = useCVStore((s) => s.isAuthLoading);
+  const storeTokenBalance = useCVStore((s) => s.tokenBalance);
+  const storeTokenExpiresInDays = useCVStore((s) => s.tokenExpiresInDays);
   const [analysis, setAnalysis] = useState<PDFAnalysisResult | null>(null);
   const [scans, setScans] = useState<ScanItem[]>([]);
-  const [tokenBalance, setTokenBalance] = useState(0);
-  const [tokenExpiresIn, setTokenExpiresIn] = useState(7);
   const [uploadError, setUploadError] = useState("");
   const [isUploading, setIsUploading] = useState(false);
   const [selectedScan, setSelectedScan] = useState<ScanItem | null>(null);
-  const mountedRef = useRef(true);
   const auth = typeof window !== "undefined" ? getFirebaseAuthModule() : null as any;
 
   useEffect(() => {
-    return () => {
-      mountedRef.current = false;
-    };
-  }, []);
-
-  useEffect(() => {
-    checkAuth();
     loadScans();
   }, []);
 
-  const checkAuth = async () => {
-    try {
-      const res = await fetch("/api/auth/me");
-      if (!res.ok) {
-        router.push("/login");
-        return;
-      }
-      const json = await res.json();
-      setUser(json.user);
-      setTokenBalance(json.user.tokens.balance);
-      setTokenExpiresIn(7);
-    } catch {
+  useEffect(() => {
+    if (!storeIsAuthLoading && !storeUser) {
       router.push("/login");
-    } finally {
-      setIsAuthLoading(false);
     }
-  };
+  }, [storeIsAuthLoading, storeUser, router]);
 
   const loadScans = async () => {
     try {
@@ -210,7 +191,7 @@ export default function DashboardPage() {
       }
 
       setAnalysis(json.analysis);
-      setTokenBalance(json.tokenBalance ?? 0);
+      useCVStore.getState().refreshTokens();
       setIsUploading(false);
       if (json.scan?.id) {
         setSelectedScan({ id: json.scan.id, fileName: file.name, score: json.analysis.score, createdAt: new Date().toISOString() });
@@ -230,7 +211,7 @@ export default function DashboardPage() {
     router.refresh();
   };
 
-  if (isAuthLoading) {
+  if (storeIsAuthLoading) {
     return (
       <div className="min-h-screen bg-dark-950 text-dark-100 flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-lightning-500 border-t-transparent rounded-full animate-spin" />
@@ -254,14 +235,14 @@ export default function DashboardPage() {
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
               <h1 className="text-xl sm:text-2xl font-bold">
-                Welcome, <span className="gradient-text">{user?.name || "User"}</span>
+                Welcome, <span className="gradient-text">{storeUser?.name || "User"}</span>
               </h1>
               <p className="text-sm text-dark-400 mt-1">
                 Upload a CV PDF to get an instant AI analysis and ATS score.
               </p>
             </div>
             <div className="flex items-center gap-3">
-              <TokenBadge balance={tokenBalance} expiresInDays={tokenExpiresIn} />
+              <TokenBadge balance={storeTokenBalance} expiresInDays={storeTokenExpiresInDays} />
               <button
                 onClick={handleLogout}
                 className="px-3 py-2 rounded-lg text-xs font-medium text-dark-400 hover:text-red-500 hover:bg-red-500/10 transition-all"
@@ -349,7 +330,7 @@ export default function DashboardPage() {
                 </div>
               </div>
 
-              {/* Detailed Overview */}
+              {/* Detailed Overview
               {analysis.detailedOverview && (
                 <div className="card-3d p-6 sm:p-8">
                   <h3 className="text-sm font-semibold uppercase tracking-wider text-dark-100 mb-4">
@@ -362,10 +343,16 @@ export default function DashboardPage() {
               )}
 
               {/* Good / Bad Impressions */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <ImpressionBox type="good" title="Strengths" items={analysis.goodImpressions ?? []} />
-                <ImpressionBox type="bad" title="Weaknesses" items={analysis.badImpressions ?? []} />
-              </div>
+              {(analysis.goodImpressions?.length || analysis.badImpressions?.length) ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {analysis.goodImpressions?.length > 0 && (
+                    <ImpressionBox type="good" title="Strengths" items={analysis.goodImpressions} />
+                  )}
+                  {analysis.badImpressions?.length > 0 && (
+                    <ImpressionBox type="bad" title="Weaknesses" items={analysis.badImpressions} />
+                  )}
+                </div>
+              ) : null}
 
               {/* Weaknesses + Tips */}
               {analysis.weaknesses && analysis.weaknesses.length > 0 && (
@@ -440,7 +427,7 @@ export default function DashboardPage() {
                     ))}
                   </ul>
                 </div>
-              )}
+              ) }
 
               {/* CTA */}
               <div className="flex flex-col sm:flex-row items-stretch gap-4">

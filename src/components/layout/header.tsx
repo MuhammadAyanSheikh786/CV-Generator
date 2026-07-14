@@ -55,8 +55,12 @@ export function Header() {
             {/* User Profile — visible on all pages when logged in */}
             {user && (
               <div className="hidden sm:flex items-center gap-2 ml-4 pl-4 border-l border-dark-200 dark:border-dark-700">
-                <div className="w-8 h-8 rounded-lg bg-lightning-500/10 border border-lightning-500/20 flex items-center justify-center text-xs font-bold text-lightning-500">
-                  {getInitials(user.name)}
+                <div className="w-8 h-8 rounded-lg bg-lightning-500/10 border border-lightning-500/20 flex items-center justify-center text-xs font-bold text-lightning-500 overflow-hidden">
+                  {user.photoURL ? (
+                    <img src={user.photoURL} alt={user.name} className="w-full h-full object-cover" />
+                  ) : (
+                    getInitials(user.name)
+                  )}
                 </div>
                 <div className="text-left">
                   <p className="text-xs font-semibold text-dark-800 dark:text-dark-200 leading-tight">
@@ -75,7 +79,6 @@ export function Header() {
                       </svg>
                       {remainingGens}
                     </span>
-                    <span>{remainingGens}</span>
                   </div>
                 </div>
                 <button
@@ -122,6 +125,15 @@ export function Header() {
                   className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-lightning-500 hover:bg-lightning-500/10 transition-all"
                 >
                   <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                  </svg>
+                  Dashboard
+                </Link>
+                <Link
+                  href="/resume-checker"
+                  className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-dark-400 dark:text-dark-500 hover:text-lightning-500 hover:bg-lightning-500/10 transition-all"
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
                   </svg>
                   AI Resume Checker
@@ -136,13 +148,17 @@ export function Header() {
                   </svg>
                   Logout
                 </button>
-                {/* Mobile profile */}
+                {/* Mobile: Dashboard + Profile */}
                 <Link
                   href="/dashboard"
-                  className="sm:hidden flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-lightning-500 hover:bg-lightning-500/10 transition-all"
+                  className="sm:hidden flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-xs font-medium text-lightning-500 hover:bg-lightning-500/10 transition-all"
                 >
-                  <div className="w-6 h-6 rounded-md bg-lightning-500/10 border border-lightning-500/20 flex items-center justify-center text-[8px] font-bold text-lightning-500">
-                    {getInitials(user.name)}
+                  <div className="w-6 h-6 rounded-md bg-lightning-500/10 border border-lightning-500/20 flex items-center justify-center text-[8px] font-bold text-lightning-500 overflow-hidden">
+                    {user.photoURL ? (
+                      <img src={user.photoURL} alt={user.name} className="w-full h-full object-cover" />
+                    ) : (
+                      getInitials(user.name)
+                    )}
                   </div>
                   <span className="text-[10px]">{tokenBalance}</span>
                 </Link>

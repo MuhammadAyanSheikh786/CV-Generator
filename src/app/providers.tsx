@@ -23,17 +23,24 @@ export function Providers({ children }: { children: React.ReactNode }) {
     const auth = getFirebaseAuthModule();
     if (!auth) return;
 
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (firebaseUser) {
-        const token = await firebaseUser.getIdToken();
-        document.cookie = `token=${token}; path=/; max-age=604800; SameSite=Lax`;
-      } else {
-        document.cookie = "token=; path=/; max-age=0";
-      }
-      checkAuth();
+    let cancelled = false;
+    let unsubscribe: (() => void) | undefined;
+
+    auth.authStateReady().then(() => {
+      if (cancelled) return;
+      unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+        if (firebaseUser) {
+          const token = await firebaseUser.getIdToken();
+          document.cookie = `token=${token}; path=/; max-age=604800; SameSite=Lax`;
+        }
+        if (!cancelled) checkAuth();
+      });
     });
 
-    return () => unsubscribe();
+    return () => {
+      cancelled = true;
+      unsubscribe?.();
+    };
   }, [checkAuth]);
 
   return (

@@ -51,8 +51,11 @@ function parseFallbackAnalysis(raw: string): PDFAnalysisResult {
     );
     const section = raw.match(sectionRegex);
     if (!section) return [];
-    const items = [...section[0].matchAll(/[-*]\s*(.+?)(?=\n|$)/g)]
-      .map((m) => m[1].trim())
+    const items = section[0]
+      .split("\n")
+      .map((l) => l.trim())
+      .filter((l) => /^[-]\s/.test(l) || /^\*\s(?!\*)/.test(l))
+      .map((l) => l.replace(/^[-*]\s+/, "").trim())
       .filter((t) => t.length > 3);
     return items;
   };
@@ -72,18 +75,15 @@ function parseFallbackAnalysis(raw: string): PDFAnalysisResult {
   const weaknesses = extractListItems("Weaknesses?");
   const tipsToFix = extractListItems("Tips?|Tips to Fix");
 
-  const fallbackBad = badImpressions.length ? badImpressions : ["Review the AI feedback"];
-  const fallbackActions = actionItems.length ? actionItems : ["Review your CV based on the analysis"];
-
   return {
     score,
     breakdown,
-    detailedOverview,
-    goodImpressions: goodImpressions.length ? goodImpressions : ["CV analysis completed"],
-    badImpressions: fallbackBad,
-    actionItems: fallbackActions,
-    weaknesses: weaknesses.length ? weaknesses : fallbackBad,
-    tipsToFix: tipsToFix.length ? tipsToFix : fallbackActions,
+    detailedOverview: detailedOverview || "",
+    goodImpressions: goodImpressions.length ? goodImpressions : [],
+    badImpressions: badImpressions.length ? badImpressions : [],
+    actionItems: actionItems.length ? actionItems : [],
+    weaknesses: weaknesses.length ? weaknesses : [],
+    tipsToFix: tipsToFix.length ? tipsToFix : [],
   };
 }
 
@@ -193,14 +193,11 @@ export async function POST(request: NextRequest) {
       keywords: typeof bd.keywords === "number" ? bd.keywords : 50,
       tone: typeof bd.tone === "number" ? bd.tone : 50,
     };
-    // Fall back badImpressions into weaknesses if empty
-    if (!result.weaknesses || result.weaknesses.length === 0) {
-      result.weaknesses = (result.badImpressions || []).filter(Boolean);
-    }
-    // Fall back actionItems into tipsToFix if empty
-    if (!result.tipsToFix || result.tipsToFix.length === 0) {
-      result.tipsToFix = (result.actionItems || []).filter(Boolean);
-    }
+    if (!result.weaknesses) result.weaknesses = [];
+    if (!result.tipsToFix) result.tipsToFix = [];
+    if (!result.actionItems) result.actionItems = [];
+    if (!result.goodImpressions) result.goodImpressions = [];
+    if (!result.badImpressions) result.badImpressions = [];
 
     if (!(await deductToken(user.id))) {
       return NextResponse.json(
@@ -222,6 +219,9 @@ export async function POST(request: NextRequest) {
         goodImpressions: result.goodImpressions || [],
         badImpressions: result.badImpressions || [],
         actionItems: result.actionItems || [],
+        weaknesses: result.weaknesses || [],
+        tipsToFix: result.tipsToFix || [],
+        detailedOverview: result.detailedOverview ?? null,
       },
       score: result.score,
     });

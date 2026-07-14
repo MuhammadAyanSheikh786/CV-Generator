@@ -34,6 +34,8 @@ export async function getAuthUser(request: NextRequest) {
   const uid = decoded.uid;
   const email = decoded.email || "";
 
+  const photoURL = decoded.picture || null;
+
   let user = await prisma.user.findUnique({ where: { id: uid } });
   if (!user) {
     user = await prisma.user.create({
@@ -41,6 +43,7 @@ export async function getAuthUser(request: NextRequest) {
         id: uid,
         name: decoded.name || email.split("@")[0] || "User",
         email,
+        photoURL,
       },
     });
     const existingToken = await prisma.token.findUnique({ where: { userId: uid } });
@@ -55,9 +58,12 @@ export async function getAuthUser(request: NextRequest) {
     }
   }
 
-  // Sync email if changed in Firebase
-  if (user.email !== email) {
-    user = await prisma.user.update({ where: { id: uid }, data: { email } });
+  // Sync email or photoURL if changed in Firebase
+  const updates: Record<string, any> = {};
+  if (user.email !== email) updates.email = email;
+  if (photoURL && user.photoURL !== photoURL) updates.photoURL = photoURL;
+  if (Object.keys(updates).length > 0) {
+    user = await prisma.user.update({ where: { id: uid }, data: updates });
   }
 
   const tokenRecord = await prisma.token.findUnique({ where: { userId: uid } });
@@ -65,6 +71,7 @@ export async function getAuthUser(request: NextRequest) {
     id: uid,
     email: user.email,
     name: user.name,
+    photoURL: user.photoURL || undefined,
     createdAt: user.createdAt,
     tokens: { balance: tokenRecord?.balance ?? 0 },
   };

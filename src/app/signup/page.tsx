@@ -43,7 +43,7 @@ export default function SignupPage() {
       const token = await cred.user.getIdToken();
       document.cookie = `token=${token}; path=/; max-age=604800; SameSite=Lax`;
       addToast("success", "Account created! You received 50 free tokens.");
-      window.location.href = "/builder";
+      window.location.href = "/dashboard";
     } catch (err: any) {
       const msg = err.message || "";
       if (msg.includes("email-already-in-use")) {
@@ -63,7 +63,7 @@ export default function SignupPage() {
       const token = await result.user.getIdToken();
       document.cookie = `token=${token}; path=/; max-age=604800; SameSite=Lax`;
       addToast("success", "Account created! You received 50 free tokens.");
-      window.location.href = "/builder";
+      window.location.href = "/dashboard";
     } catch (err: any) {
       const msg = err.message || "";
       if (msg.includes("auth/popup-closed-by-user")) return;

@@ -26,7 +26,7 @@ export default function LoginPage() {
       const cred = await signInWithEmailAndPassword(auth, email, password);
       const token = await cred.user.getIdToken();
       document.cookie = `token=${token}; path=/; max-age=604800; SameSite=Lax`;
-      window.location.href = "/builder";
+      window.location.href = "/dashboard";
     } catch (err: any) {
       const code = err.code || "";
       setError(
@@ -44,7 +44,7 @@ export default function LoginPage() {
       const result = await signInWithPopup(auth, googleProvider);
       const token = await result.user.getIdToken();
       document.cookie = `token=${token}; path=/; max-age=604800; SameSite=Lax`;
-      window.location.href = "/builder";
+      window.location.href = "/dashboard";
     } catch (err: any) {
       if (err.code !== "auth/popup-closed-by-user") {
         setError(err.message || "Google login failed");

@@ -224,8 +224,12 @@ export default function Home() {
                     AI Resume Checker
                   </Link>
                   <div className="hidden sm:flex items-center gap-2 pl-3 border-l border-dark-200 dark:border-dark-700">
-                    <div className="w-7 h-7 rounded-lg bg-lightning-500/10 border border-lightning-500/20 flex items-center justify-center text-[10px] font-bold text-lightning-500">
-                      {getInitials(user.name)}
+                    <div className="w-7 h-7 rounded-lg bg-lightning-500/10 border border-lightning-500/20 flex items-center justify-center text-[10px] font-bold text-lightning-500 overflow-hidden">
+                      {user.photoURL ? (
+                        <img src={user.photoURL} alt={user.name} className="w-full h-full object-cover" />
+                      ) : (
+                        getInitials(user.name)
+                      )}
                     </div>
                     <div className="text-left">
                       <p className="text-[11px] font-semibold text-dark-800 dark:text-dark-200 leading-tight">{user.name}</p>
@@ -244,13 +248,17 @@ export default function Home() {
                       </svg>
                     </button>
                   </div>
-                  {/* Mobile: show initials + dashboard */}
+                  {/* Mobile: show avatar + dashboard */}
                   <Link
                     href="/dashboard"
                     className="sm:hidden flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-xs font-medium text-lightning-500"
                   >
-                    <div className="w-6 h-6 rounded-md bg-lightning-500/10 border border-lightning-500/20 flex items-center justify-center text-[8px] font-bold">
-                      {getInitials(user.name)}
+                    <div className="w-6 h-6 rounded-md bg-lightning-500/10 border border-lightning-500/20 flex items-center justify-center text-[8px] font-bold overflow-hidden">
+                      {user.photoURL ? (
+                        <img src={user.photoURL} alt={user.name} className="w-full h-full object-cover" />
+                      ) : (
+                        getInitials(user.name)
+                      )}
                     </div>
                   </Link>
                 </>

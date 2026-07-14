@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { AICheckResult } from "@/lib/schemas";
+import { PDFAnalysisResult } from "@/lib/schemas";
 
 export interface CVScan {
   id: string;
@@ -7,7 +7,7 @@ export interface CVScan {
   fileName: string;
   imageKitUrl?: string;
   textSnippet: string;
-  result: AICheckResult;
+  result: PDFAnalysisResult;
   createdAt: string;
   score: number;
 }
@@ -28,24 +28,19 @@ function fromPrisma(scan: {
   textSnippet: string | null;
   createdAt: Date;
 }): CVScan {
-  const result: AICheckResult & {
-    detailedOverview?: string;
-    weaknesses?: string[];
-    tipsToFix?: string[];
-  } = {
+  const parsedWeaknesses = JSON.parse(scan.weaknesses ?? "[]");
+  const parsedTipsToFix = JSON.parse(scan.tipsToFix ?? "[]");
+
+  const result: PDFAnalysisResult = {
     score: scan.score,
     breakdown: JSON.parse(scan.breakdown ?? "{}"),
     goodImpressions: JSON.parse(scan.goodImpressions ?? "[]"),
     badImpressions: JSON.parse(scan.badImpressions ?? "[]"),
     actionItems: JSON.parse(scan.actionItems ?? "[]"),
+    weaknesses: parsedWeaknesses.length ? parsedWeaknesses : [],
+    tipsToFix: parsedTipsToFix.length ? parsedTipsToFix : [],
+    detailedOverview: scan.detailedOverview ?? "",
   };
-
-  const parsedWeaknesses = JSON.parse(scan.weaknesses ?? "[]");
-  const parsedTipsToFix = JSON.parse(scan.tipsToFix ?? "[]");
-
-  if (scan.detailedOverview) result.detailedOverview = scan.detailedOverview;
-  if (parsedWeaknesses.length) result.weaknesses = parsedWeaknesses;
-  if (parsedTipsToFix.length) result.tipsToFix = parsedTipsToFix;
 
   return {
     id: scan.id,
@@ -53,7 +48,7 @@ function fromPrisma(scan: {
     fileName: scan.fileName,
     imageKitUrl: scan.imageKitUrl ?? undefined,
     textSnippet: scan.textSnippet ?? "",
-    result: result as AICheckResult,
+    result,
     score: scan.score,
     createdAt: scan.createdAt.toISOString(),
   };
@@ -75,9 +70,9 @@ export async function saveScan(
       goodImpressions: JSON.stringify(result.goodImpressions),
       badImpressions: JSON.stringify(result.badImpressions),
       actionItems: JSON.stringify(result.actionItems),
-      weaknesses: JSON.stringify((result as any).weaknesses ?? []),
-      tipsToFix: JSON.stringify((result as any).tipsToFix ?? []),
-      detailedOverview: (result as any).detailedOverview ?? null,
+      weaknesses: JSON.stringify(result.weaknesses ?? []),
+      tipsToFix: JSON.stringify(result.tipsToFix ?? []),
+      detailedOverview: result.detailedOverview ?? null,
     },
   });
 
